@@ -658,6 +658,13 @@ def main():
         if e_type not in TAGS or e_type not in AUTO_PUSH_TYPES:
             continue
 
+        # Automatic scheduled broadcasts are local to the Nogales deployment.
+        # Keep all configured ZONES available for queries/labeling, but only
+        # auto-push I-19 Tucson-Nogales and Santa Cruz County events.
+        zone = ev.get("_zone") or {}
+        if zone.get("tag") not in {"I19", "SCZ"}:
+            continue
+
         # Recency filter (push path only) — skip events that started longer ago
         # than the window so old/long-running closures don't broadcast as new.
         if not started_recently(ev, now):
