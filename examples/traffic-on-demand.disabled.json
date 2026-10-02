@@ -1,0 +1,165 @@
+{
+  "name": "Traffic (On-Demand)",
+  "description": "Text replies via Nogales Spicy, hop limit 3. Replace source UUID before use.",
+  "enabled": false,
+  "config": {
+    "version": 1,
+    "nodes": [
+      {
+        "id": "trigger",
+        "type": "trigger.message",
+        "params": {
+          "regex": "(?i)^!traffic( .+)?$"
+        }
+      },
+      {
+        "id": "run",
+        "type": "action.runScript",
+        "params": {
+          "scriptPath": "traffic_responder.py",
+          "resultVariable": "traffic"
+        }
+      },
+      {
+        "id": "has_single",
+        "type": "condition.variable",
+        "params": {
+          "variable": "traffic.response"
+        }
+      },
+      {
+        "id": "send_single",
+        "type": "action.sendMessage",
+        "params": {
+          "text": "{{ var.traffic.response }}",
+          "replyToTrigger": true,
+          "sourceIds": [
+            "REPLACE_WITH_SOURCE_UUID"
+          ],
+          "hopLimit": 3
+        }
+      },
+      {
+        "id": "has_0",
+        "type": "condition.variable",
+        "params": {
+          "variable": "traffic.responses.0"
+        }
+      },
+      {
+        "id": "send_0",
+        "type": "action.sendMessage",
+        "params": {
+          "text": "{{ var.traffic.responses.0 }}",
+          "replyToTrigger": true,
+          "sourceIds": [
+            "REPLACE_WITH_SOURCE_UUID"
+          ],
+          "hopLimit": 3
+        }
+      },
+      {
+        "id": "pause_1",
+        "type": "action.delay",
+        "params": {
+          "seconds": 5
+        }
+      },
+      {
+        "id": "has_1",
+        "type": "condition.variable",
+        "params": {
+          "variable": "traffic.responses.1"
+        }
+      },
+      {
+        "id": "send_1",
+        "type": "action.sendMessage",
+        "params": {
+          "text": "{{ var.traffic.responses.1 }}",
+          "replyToTrigger": true,
+          "sourceIds": [
+            "REPLACE_WITH_SOURCE_UUID"
+          ],
+          "hopLimit": 3
+        }
+      },
+      {
+        "id": "pause_2",
+        "type": "action.delay",
+        "params": {
+          "seconds": 5
+        }
+      },
+      {
+        "id": "has_2",
+        "type": "condition.variable",
+        "params": {
+          "variable": "traffic.responses.2"
+        }
+      },
+      {
+        "id": "send_2",
+        "type": "action.sendMessage",
+        "params": {
+          "text": "{{ var.traffic.responses.2 }}",
+          "replyToTrigger": true,
+          "sourceIds": [
+            "REPLACE_WITH_SOURCE_UUID"
+          ],
+          "hopLimit": 3
+        }
+      }
+    ],
+    "edges": [
+      {
+        "from": "trigger",
+        "to": "run"
+      },
+      {
+        "from": "run",
+        "to": "has_single"
+      },
+      {
+        "from": "has_single",
+        "to": "send_single",
+        "port": "true"
+      },
+      {
+        "from": "run",
+        "to": "has_0"
+      },
+      {
+        "from": "has_0",
+        "to": "send_0",
+        "port": "true"
+      },
+      {
+        "from": "send_0",
+        "to": "pause_1"
+      },
+      {
+        "from": "pause_1",
+        "to": "has_1"
+      },
+      {
+        "from": "has_1",
+        "to": "send_1",
+        "port": "true"
+      },
+      {
+        "from": "send_1",
+        "to": "pause_2"
+      },
+      {
+        "from": "pause_2",
+        "to": "has_2"
+      },
+      {
+        "from": "has_2",
+        "to": "send_2",
+        "port": "true"
+      }
+    ]
+  }
+}

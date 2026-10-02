@@ -1,0 +1,228 @@
+{
+  "name": "Traffic Alerts — I-19 / Santa Cruz",
+  "description": "Five-minute AZ511 poll, native pins and channel 3 text, bounded attempts. Replace source UUID before use.",
+  "enabled": false,
+  "config": {
+    "version": 1,
+    "nodes": [
+      {
+        "id": "schedule",
+        "type": "trigger.schedule",
+        "params": {
+          "cron": "*/5 * * * *"
+        }
+      },
+      {
+        "id": "reset",
+        "type": "flow.setVar",
+        "params": {
+          "variable": "traffic_scheduled",
+          "value": {}
+        }
+      },
+      {
+        "id": "produce",
+        "type": "action.runScript",
+        "params": {
+          "scriptPath": "traffic_attempts.py",
+          "args": "--prepare --ledger /data/scripts/state/traffic_attempts.json",
+          "resultVariable": "traffic_scheduled",
+          "timeoutSeconds": 30
+        }
+      },
+      {
+        "id": "has0",
+        "type": "condition.variable",
+        "params": {
+          "variable": "traffic_scheduled.incident0.present",
+          "op": "==",
+          "value": true
+        }
+      },
+      {
+        "id": "wp0",
+        "type": "action.broadcastWaypoint",
+        "params": {
+          "sourceId": "REPLACE_WITH_SOURCE_UUID",
+          "waypointKey": "{{ var.traffic_scheduled.incident0.waypoint_key }}",
+          "latitude": "{{ var.traffic_scheduled.incident0.latitude }}",
+          "longitude": "{{ var.traffic_scheduled.incident0.longitude }}",
+          "name": "{{ var.traffic_scheduled.incident0.name }}",
+          "description": "{{ var.traffic_scheduled.incident0.description }}",
+          "icon": "{{ var.traffic_scheduled.incident0.icon }}",
+          "expireHours": "{{ var.traffic_scheduled.incident0.expire_hours }}",
+          "channel": 3,
+          "hopLimit": "3",
+          "onlyWhenChanged": true
+        }
+      },
+      {
+        "id": "pause0",
+        "type": "action.delay",
+        "params": {
+          "seconds": 5
+        }
+      },
+      {
+        "id": "text0",
+        "type": "action.sendMessage",
+        "params": {
+          "sourceIds": [
+            "REPLACE_WITH_SOURCE_UUID"
+          ],
+          "channel": 3,
+          "text": "{{ var.traffic_scheduled.incident0.text }}"
+        }
+      },
+      {
+        "id": "has1",
+        "type": "condition.variable",
+        "params": {
+          "variable": "traffic_scheduled.incident1.present",
+          "op": "==",
+          "value": true
+        }
+      },
+      {
+        "id": "wp1",
+        "type": "action.broadcastWaypoint",
+        "params": {
+          "sourceId": "REPLACE_WITH_SOURCE_UUID",
+          "waypointKey": "{{ var.traffic_scheduled.incident1.waypoint_key }}",
+          "latitude": "{{ var.traffic_scheduled.incident1.latitude }}",
+          "longitude": "{{ var.traffic_scheduled.incident1.longitude }}",
+          "name": "{{ var.traffic_scheduled.incident1.name }}",
+          "description": "{{ var.traffic_scheduled.incident1.description }}",
+          "icon": "{{ var.traffic_scheduled.incident1.icon }}",
+          "expireHours": "{{ var.traffic_scheduled.incident1.expire_hours }}",
+          "channel": 3,
+          "hopLimit": "3",
+          "onlyWhenChanged": true
+        }
+      },
+      {
+        "id": "pause1",
+        "type": "action.delay",
+        "params": {
+          "seconds": 5
+        }
+      },
+      {
+        "id": "text1",
+        "type": "action.sendMessage",
+        "params": {
+          "sourceIds": [
+            "REPLACE_WITH_SOURCE_UUID"
+          ],
+          "channel": 3,
+          "text": "{{ var.traffic_scheduled.incident1.text }}"
+        }
+      },
+      {
+        "id": "has2",
+        "type": "condition.variable",
+        "params": {
+          "variable": "traffic_scheduled.incident2.present",
+          "op": "==",
+          "value": true
+        }
+      },
+      {
+        "id": "wp2",
+        "type": "action.broadcastWaypoint",
+        "params": {
+          "sourceId": "REPLACE_WITH_SOURCE_UUID",
+          "waypointKey": "{{ var.traffic_scheduled.incident2.waypoint_key }}",
+          "latitude": "{{ var.traffic_scheduled.incident2.latitude }}",
+          "longitude": "{{ var.traffic_scheduled.incident2.longitude }}",
+          "name": "{{ var.traffic_scheduled.incident2.name }}",
+          "description": "{{ var.traffic_scheduled.incident2.description }}",
+          "icon": "{{ var.traffic_scheduled.incident2.icon }}",
+          "expireHours": "{{ var.traffic_scheduled.incident2.expire_hours }}",
+          "channel": 3,
+          "hopLimit": "3",
+          "onlyWhenChanged": true
+        }
+      },
+      {
+        "id": "pause2",
+        "type": "action.delay",
+        "params": {
+          "seconds": 5
+        }
+      },
+      {
+        "id": "text2",
+        "type": "action.sendMessage",
+        "params": {
+          "sourceIds": [
+            "REPLACE_WITH_SOURCE_UUID"
+          ],
+          "channel": 3,
+          "text": "{{ var.traffic_scheduled.incident2.text }}"
+        }
+      }
+    ],
+    "edges": [
+      {
+        "from": "schedule",
+        "to": "reset"
+      },
+      {
+        "from": "reset",
+        "to": "produce"
+      },
+      {
+        "from": "produce",
+        "to": "has0"
+      },
+      {
+        "from": "has0",
+        "to": "wp0",
+        "port": "true"
+      },
+      {
+        "from": "wp0",
+        "to": "pause0"
+      },
+      {
+        "from": "pause0",
+        "to": "text0"
+      },
+      {
+        "from": "produce",
+        "to": "has1"
+      },
+      {
+        "from": "has1",
+        "to": "wp1",
+        "port": "true"
+      },
+      {
+        "from": "wp1",
+        "to": "pause1"
+      },
+      {
+        "from": "pause1",
+        "to": "text1"
+      },
+      {
+        "from": "produce",
+        "to": "has2"
+      },
+      {
+        "from": "has2",
+        "to": "wp2",
+        "port": "true"
+      },
+      {
+        "from": "wp2",
+        "to": "pause2"
+      },
+      {
+        "from": "pause2",
+        "to": "text2"
+      }
+    ]
+  }
+}

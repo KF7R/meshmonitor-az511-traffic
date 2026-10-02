@@ -1,0 +1,61 @@
+{
+  "meshmonitorVersion": "4.17.0-rc1",
+  "transport": "mocked",
+  "examplesValidated": 3,
+  "scenarios": [
+    {
+      "label": "0 incidents",
+      "waypoints": 0,
+      "messages": 0,
+      "actionErrors": 0
+    },
+    {
+      "label": "1 incidents",
+      "waypoints": 1,
+      "messages": 1,
+      "actionErrors": 0
+    },
+    {
+      "label": "2 incidents",
+      "waypoints": 2,
+      "messages": 2,
+      "actionErrors": 0
+    },
+    {
+      "label": "3 incidents",
+      "waypoints": 3,
+      "messages": 3,
+      "actionErrors": 0
+    },
+    {
+      "label": "script failure clears stale result",
+      "waypoints": 0,
+      "messages": 0,
+      "actionErrors": 1
+    },
+    {
+      "label": "waypoint failure still permits text",
+      "waypoints": 3,
+      "messages": 3,
+      "actionErrors": 3
+    },
+    {
+      "label": "MIN_INTERVAL still permits text",
+      "waypoints": 3,
+      "messages": 3,
+      "actionErrors": 0
+    },
+    {
+      "label": "NOT_CONNECTED still permits text",
+      "waypoints": 3,
+      "messages": 3,
+      "actionErrors": 0
+    },
+    {
+      "label": "TX_DISABLED still permits text",
+      "waypoints": 3,
+      "messages": 3,
+      "actionErrors": 0
+    }
+  ]
+}
