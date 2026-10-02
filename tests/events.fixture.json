@@ -1,0 +1,50 @@
+[
+  {
+    "ID": "1",
+    "Latitude": 31.5,
+    "Longitude": -110.96,
+    "RoadwayName": "I-19",
+    "EventType": "accidentsAndIncidents",
+    "EventSubType": "crash",
+    "Description": "Fixture crash 1",
+    "StartDate": 1790848500,
+    "LastUpdated": 1790848800,
+    "PlannedEndDate": 1790884800
+  },
+  {
+    "ID": "2",
+    "Latitude": 31.5,
+    "Longitude": -110.96,
+    "RoadwayName": "I-19",
+    "EventType": "accidentsAndIncidents",
+    "EventSubType": "crash",
+    "Description": "Fixture crash 2",
+    "StartDate": 1790848500,
+    "LastUpdated": 1790848800,
+    "PlannedEndDate": 1790884800
+  },
+  {
+    "ID": "3",
+    "Latitude": 31.5,
+    "Longitude": -110.96,
+    "RoadwayName": "I-19",
+    "EventType": "accidentsAndIncidents",
+    "EventSubType": "crash",
+    "Description": "Fixture crash 3",
+    "StartDate": 1790848500,
+    "LastUpdated": 1790848800,
+    "PlannedEndDate": 1790884800
+  },
+  {
+    "ID": "4",
+    "Latitude": 31.5,
+    "Longitude": -110.96,
+    "RoadwayName": "I-19",
+    "EventType": "accidentsAndIncidents",
+    "EventSubType": "crash",
+    "Description": "Fixture crash 4",
+    "StartDate": 1790848500,
+    "LastUpdated": 1790848800,
+    "PlannedEndDate": 1790884800
+  }
+]

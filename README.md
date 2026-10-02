@@ -1,70 +1,71 @@
 # MeshMonitor AZ511 Traffic
 
-Arizona traffic alerts and on-demand traffic lookups for Meshtastic / MeshMonitor using the Arizona ADOT 511 API.
+Arizona traffic alerts and road lookups for Meshtastic, using the ADOT AZ511 feed.
+
+The recommended scheduled workflow uses MeshMonitor's native `action.broadcastWaypoint`: Python fetches and selects incidents, and MeshMonitor broadcasts their map pins and Traffic-channel text. The separate `!traffic` responder provides on-demand reports.
+
+**Verified deployment:** MeshMonitor **4.17.0-rc1**, Docker on Raspberry Pi, October 2, 2026. The five-minute I-19/Santa Cruz timer is installed and enabled. A separate controlled test delivered both its TEST message and waypoint to a receiving app. Automatic delivery confirmation is unavailable in this release; the timer records bounded attempts.
+
+![Scheduled Traffic automation enabled](docs/images/timer-enabled.jpg)
+
+## Start here
+
+- [Detailed installation and operating guide](docs/GUIDE.md)
+- [Feature audit, test evidence, and known limitations](docs/FEATURES.md)
+- [Disabled scheduled automation example](examples/traffic-scheduled.disabled.json)
+- [On-demand automation example](examples/traffic-on-demand.disabled.json)
+- [Manual live-test automation example](examples/traffic-test.disabled.json)
+
+## What it does
+
+| Workflow | Behavior |
+| --- | --- |
+| Scheduled alerts | Poll every five minutes; select new or changed high-impact events labeled I19/SCZ; up to three per cycle; native waypoint and Traffic text |
+| Bounded retry | Offer an incident immediately and once more after at least 30 minutes; stop after two attempts for its current fingerprint |
+| `!traffic` | Up to three Metro Phoenix freeway incidents/closures; this is **not** a Nogales digest |
+| `!traffic I-19` | Up to three matching-road events across configured zones, including roadwork |
+| Incident display | Classified emoji, normalized road, direction, zone tag, update time and Google Maps link |
+
+Coverage uses rectangles, not a county boundary polygon. Overlapping zones can exclude northern I-19 from scheduled selection. See the [coverage audit](docs/FEATURES.md#known-limitations).
+
+## Files and compatibility
+
+| File | Purpose |
+| --- | --- |
+| `traffic_attempts.py` | Recommended native timer entry point; persists a separate attempt ledger |
+| `traffic_native_data.py` | AZ511 filtering, classification, formatting, waypoint data and pure selection; no RF transport |
+| `traffic_responder.py` | Existing text-only on-demand responder |
+| `traffic_timer.py` | Retained **legacy** Virtual Node sender and helper dependency of the responder; do not enable alongside the native timer |
+| `common.py` | Shared HTTP, text, state and output helpers |
+| `examples/` | Disabled, portable automation examples; replace source placeholders before use |
+| `tests/` | Synthetic feature audit; no live AZ511, RF or production state |
+
+Install all five Python files together. The responder still imports helpers from `traffic_timer.py`; retaining that file does not transmit unless its legacy entry point is executed. This migration adds native files without changing the existing on-demand behavior.
+
+## Quick command reference
+
+```text
+!traffic
+!traffic I-19
+!traffic 19
+!traffic SR-82
+!traffic L202
+```
+
+Use `L202` or `202` for Loop 202. The currently implemented matcher does **not** support `loop202`, despite the old script docstring suggesting it. Commands search configured feed coverage, not every Arizona road.
+
+## Run the feature audit
+
+From the repository root:
+
+```bash
+python3 -m unittest discover -s tests -v
+```
+
+The audit checks filters, all classifier rule groups, command parsing, responder priority, formatting, expiry, identity, attempts, overflow and scratch-ledger error handling. It also records known coverage and route-matching limitations rather than hiding them.
 
 ## Origin and attribution
 
-This repository is a customized deployment derived from the **Arizona Meshtastic Community** traffic scripts in:
+Customized from the [Arizona Meshtastic Community traffic scripts](https://github.com/ArizonaMeshtasticCommunity/community-scripts/tree/main/traffic). The upstream project credits [Ted Malone's ADOT-511 project](https://github.com/temalo/ADOT-511). Retain these acknowledgments and consult the upstream repositories for applicable licensing terms.
 
-https://github.com/ArizonaMeshtasticCommunity/community-scripts/tree/main/traffic
-
-The upstream project contains `traffic_timer.py`, `traffic_responder.py`, and `common.py`, and describes the original traffic-alert architecture, AZ511 integration, deduplication, coverage zones, and Meshtastic traffic commands.
-
-The upstream project also credits **Ted Malone's ADOT-511 project** as an inspiration for bringing Arizona traffic data onto the mesh:
-
-https://github.com/temalo/ADOT-511
-
-This KF7R repository preserves that attribution and contains the production-customized versions used on the Nogales MeshMonitor installation.
-
-## KF7R production customizations
-
-The production version includes additional work and deployment-specific changes, including:
-
-- Expanded southern Arizona coverage, including the I-19 Tucson–Nogales corridor and Santa Cruz County.
-- Traffic event filtering and formatting refinements.
-- Roadway normalization and matching improvements.
-- New/changed-event state and retry handling.
-- Stable waypoint IDs derived from AZ511 event IDs.
-- Direct Meshtastic `WAYPOINT_APP` transmission through the MeshMonitor Virtual Node.
-- Virtual Node defaults to `localhost:4405`.
-- Traffic waypoints default to Meshtastic channel index 3 (Traffic).
-- Waypoint transmission must succeed before an event is marked seen.
-- Failed waypoint transmissions remain eligible for retry.
-- Existing MeshMonitor automation continues to transmit the returned text alerts.
-- On-demand `!traffic` responder remains separate from scheduled automatic alerts.
-
-## Files
-
-- `traffic_timer.py` — scheduled AZ511 polling, new/changed-event detection, automatic text alerts, and waypoint transmission.
-- `traffic_responder.py` — on-demand `!traffic` queries.
-- `common.py` — shared MeshMonitor utility functions.
-
-## Production timer
-
-The scheduled MeshMonitor timer is configured to run `traffic_timer.py` every 5 minutes on the Traffic channel.
-
-Example cron:
-
-```
-*/5 * * * *
-```
-
-## Required environment
-
-```
-ADOT_API_KEY=<your AZ511 API key>
-```
-
-Waypoint transport defaults:
-
-```
-MESHMONITOR_VN_PORT=4405
-MESHMONITOR_WAYPOINT_HOP_LIMIT=3
-WAYPOINT_CHANNEL=3
-```
-
-Do **not** commit API keys, MeshMonitor tokens, or other secrets to this repository.
-
-## License / upstream terms
-
-This repository is a derivative/customized deployment. Refer to the upstream repositories for their applicable licensing and attribution terms.
+Do not commit API keys, MeshMonitor tokens, production state, or Docker environment files.

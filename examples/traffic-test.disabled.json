@@ -1,0 +1,66 @@
+{
+  "name": "Traffic TEST — manual only",
+  "description": "One authorized manual TEST message and ten-minute pin. Keep disabled.",
+  "enabled": false,
+  "config": {
+    "version": 1,
+    "nodes": [
+      {
+        "id": "t",
+        "type": "trigger.message",
+        "params": {
+          "regex": "^!traffic-controlled-test-20261002$"
+        }
+      },
+      {
+        "id": "wp",
+        "type": "action.broadcastWaypoint",
+        "params": {
+          "sourceId": "REPLACE_WITH_SOURCE_UUID",
+          "waypointKey": "traffic-test-20261002",
+          "latitude": "31.3336",
+          "longitude": "-110.9414",
+          "name": "TEST Traffic",
+          "description": "TEST ONLY - synthetic traffic workflow check. No real incident. Expires in 10 minutes.",
+          "icon": "🧪",
+          "expireHours": "0.1666667",
+          "channel": 3,
+          "hopLimit": "3",
+          "onlyWhenChanged": true
+        }
+      },
+      {
+        "id": "pause",
+        "type": "action.delay",
+        "params": {
+          "seconds": 5
+        }
+      },
+      {
+        "id": "text",
+        "type": "action.sendMessage",
+        "params": {
+          "sourceIds": [
+            "REPLACE_WITH_SOURCE_UUID"
+          ],
+          "channel": 3,
+          "text": "🧪 TEST ONLY: Traffic automation check. No real incident. Look for the TEST Traffic map pin; expires in 10 minutes."
+        }
+      }
+    ],
+    "edges": [
+      {
+        "from": "t",
+        "to": "wp"
+      },
+      {
+        "from": "wp",
+        "to": "pause"
+      },
+      {
+        "from": "pause",
+        "to": "text"
+      }
+    ]
+  }
+}
