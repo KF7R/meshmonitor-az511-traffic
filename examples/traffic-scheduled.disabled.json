@@ -1,6 +1,6 @@
 {
   "name": "Traffic Alerts \u2014 I-19 / Santa Cruz",
-  "description": "Five-minute AZ511 poll; native pins and channel 3 text; one offer per visible update, no timed repeat. Replace source UUID before use.",
+  "description": "Five-minute AZ511 poll; first report plus one repeat at least one hour later per visible version. Replace source UUID before use.",
   "enabled": false,
   "config": {
     "version": 1,

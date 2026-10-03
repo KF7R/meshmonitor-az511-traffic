@@ -10,6 +10,10 @@ The current deployment runs MeshMonitor 4.17.0-rc2; the original detailed audit 
 
 The earlier two-attempt policy deliberately repeated a successful alert after 30 minutes. Description-only changes could also reset its budget while the displayed alert remained identical. This is superseded by one offer per visible headline/coordinate fingerprint, with per-ID history and quiet adoption of legacy entries. New tests cover long-term suppression, timestamp/prose churn, meaningful updates, reversion and migration. The current suite passes 26 tests. The older retry/fingerprint findings below describe the original implementation and are historical; see the current guide for the active policy. Different event IDs and transport-level duplicates remain possible. No receiver acknowledgment or automatic retry is added.
 
+## Hourly repeat policy
+
+At the operator’s request, the current scheduler allows two offers per visible version, at least 3600 seconds apart. Per-version counts prevent timestamp/prose churn and reversion from resetting the budget. The prior once-only correction below is historical. Boundary and migration tests were updated; the suite remains 26 tests.
+
 ## Feature inventory
 
 | Feature | Actual behavior | Evidence |

@@ -32,7 +32,7 @@ Prompts for source UUID, channel, hops and a hidden ADOT API key; backs up scrip
 | Workflow | Behavior |
 | --- | --- |
 | Scheduled alerts | Poll every five minutes; select new or changed high-impact events labeled I19/SCZ; up to three per cycle; native waypoint and Traffic text |
-| Duplicate suppression | One offer per visible incident version; no timed repeat; timestamp/dispatch-text churn is ignored |
+| Duplicate suppression | First report plus one repeat after at least one hour per visible version; timestamp/dispatch-text churn is ignored |
 | `!traffic` | Up to three Metro Phoenix freeway incidents/closures; this is **not** a Nogales digest |
 | `!traffic I-19` | Up to three matching-road events across configured zones, including roadwork |
 | Area lookups | `!traffic nogales`, `!traffic rio rico`, `!traffic santa cruz`; approximate area rectangles |

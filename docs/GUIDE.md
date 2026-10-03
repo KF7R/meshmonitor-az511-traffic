@@ -32,7 +32,7 @@ Python never opens a radio connection in this native path. The old Virtual Node 
 
 ### What “new” means
 
-The scheduled workflow now sends **once per visible incident update**, with no automatic 30-minute repeat. It fingerprints the classified headline (including road, direction and full-closure status) and coordinates rounded to four decimal places. A timestamp change or raw dispatch-description change alone does not trigger another alert.
+The scheduled workflow now sends **twice per visible incident update**, with at least one hour between offers. It fingerprints the classified headline (including road, direction and full-closure status) and coordinates rounded to four decimal places. A timestamp change or raw dispatch-description change alone does not trigger another alert.
 
 Each event ID retains the history of visible fingerprints already offered, so reverting to an earlier visible version is also suppressed. A changed headline or location is eligible for a new alert. Separate AZ511 IDs remain separate incidents; identical-looking records with different IDs are not merged.
 
@@ -40,12 +40,17 @@ When an old ledger entry has no visible-update history, its first observed versi
 
 ### Attempt policy
 
+Current policy: send the first report, then one repeat at the first eligible five-minute poll at least 3600 seconds later, provided the event remains active and passes the scheduled filters. Stop after two offers per visible version. There are no delivery receipts. Existing entries can receive one repeat once an hour has elapsed since their last recorded attempt.
+
+
 - First eligible visible version: record it and offer one waypoint/text pair.
-- Later polls: suppress that visible version, even after 30 minutes.
-- Changed visible version: offer once, unless that version was previously offered.
+- Polls before one hour: suppress that visible version.
+- First eligible poll at least one hour later: offer its second and final report.
+- Later polls: suppress that exhausted visible version.
+- Changed visible version: its own two-offer budget; prior version counts are retained.
 - Overflow incidents remain unrecorded until selected.
 
-The attempt is saved before MeshMonitor receives the script output. A crash, timeout, disconnected radio, skipped waypoint or failed message can consume it. There is no delivery receipt or automatic retry; use on-demand queries or investigate manually if delivery fails. The persistent ledger must not be cleared during upgrades.
+The attempt is saved before MeshMonitor receives the script output. A crash, timeout, disconnected radio, skipped waypoint or failed message can consume it. There is no delivery receipt; one repeat is allowed after an hour, then use on-demand queries or investigate manually if delivery fails. The persistent ledger must not be cleared during upgrades.
 
 The live deployment runs **4.17.0-rc2**. The operator confirmed one set of three on-demand replies after the Spicy-only receiving-source filter. Scheduled waypoints inherit radio hop settings; on-demand replies retain their explicit limit of 3. The original release-source audit below remains against rc1.
 
@@ -358,7 +363,7 @@ The full zone table is in [the feature audit](FEATURES.md#coverage-table). It re
 | `WAYPOINT_CHANNEL` | Unset | Legacy/data field; native RF channel comes from JSON |
 | `TZ` / container timezone | Deployment-dependent | Timestamp display; configure container timezone consistently |
 
-Scheduled visible versions are offered once; there is no retry interval. MeshMonitor may still throttle a changed waypoint, independently of the script.
+Scheduled visible versions are offered at most twice, with `RETRY_SECONDS = 3600` between offers. MeshMonitor may still throttle a changed waypoint, independently of the script.
 
 Expiry rules:
 
@@ -439,8 +444,8 @@ Use the intended radio's Traffic channel and a receiving app to verify output. R
 | Feed count large but no alerts | Feed count spans all zones; scheduled type/age/tag filters and ledger budgets still apply |
 | I-19 event missing | Inspect coordinates, roadway and first-matching zone; northern I-19 can be labeled TUS |
 | Pin skipped but text present | Native skip/failure does not gate the following text action in rc1 |
-| Same text twice | Check for another enabled timer, distinct feed IDs, or old scheduler code; current policy has no timed resend |
-| No output after a failed send | No automatic retry; inspect transport and use an on-demand query |
+| Same text twice | Check for another enabled timer, distinct feed IDs, or old scheduler code; current policy allows only one repeat, at least an hour later |
+| No output after a failed send | One hourly repeat only; inspect transport and use an on-demand query after exhaustion |
 | Stale incident data sent | Reset and script can both fail; inspect run errors; prevent overlapping runs |
 | Wrong channel | Verify source-specific channel index and every JSON message/waypoint action |
 | Only text or only pin in an app | Check receiver channel/key, RF reach, expiry and action errors; action completion is not receipt confirmation |
