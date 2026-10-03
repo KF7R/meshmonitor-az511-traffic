@@ -16,7 +16,7 @@ parameter from the trigger regex:
 
   !traffic 60             → "everything on this road" digest across ALL
   !traffic I-10             zones (all event types — accidents, closures,
-  !traffic loop202          hazards, roadwork — on the matched roadway)
+  !traffic L202          hazards, roadwork — on the matched roadway)
 
 Why the asymmetry: the parameterless ask is "give me the local situation
 report" — same lens as the timer, freeways and high-impact events only,
@@ -70,6 +70,24 @@ from traffic_timer import (
 TAG = "traffic_trigger"
 MAX_RESULTS = 3
 
+# Approximate area boxes; these are local lookups, not municipal boundaries.
+AREA_BOXES = {
+    'nogales': ('Nogales', (31.33, 31.43, -111.02, -110.88)),
+    'rio rico': ('Rio Rico', (31.43, 31.65, -111.08, -110.88)),
+    'santa cruz': ('Santa Cruz County', (31.33, 31.80, -111.08, -110.43)),
+}
+
+def get_area(query):
+    key = re.sub(r'[-_\s]+', ' ', (query or '').lower()).strip()
+    key = {'riorico': 'rio rico', 'santacruz': 'santa cruz',
+           'santa cruz county': 'santa cruz', 'scz': 'santa cruz'}.get(key, key)
+    return AREA_BOXES.get(key)
+
+def in_area(event, box):
+    lat, lon = event.get('Latitude'), event.get('Longitude')
+    return (isinstance(lat, (int, float)) and isinstance(lon, (int, float))
+            and box[0] <= lat <= box[1] and box[2] <= lon <= box[3])
+
 def get_highway_param():
     """
     Return the optional roadway requested with !traffic.
@@ -103,8 +121,16 @@ def main():
         return
 
     highway = get_highway_param()
+    area = get_area(highway)
 
-    if highway:
+    if area:
+        label, box = area
+        matches = [ev for ev in events if in_area(ev, box)
+                   and str(ev.get('EventType', '')).lower() in TAGS]
+        if not matches:
+            respond(f'✅ No active AZ511 events reported for {label}')
+            return
+    elif highway:
         # Specific-road mode: all event types on the matched roadway
         matches = [
             ev for ev in events

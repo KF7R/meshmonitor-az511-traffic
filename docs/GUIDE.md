@@ -175,17 +175,35 @@ Trigger regex:
 
 The script also parses `MESSAGE` case-insensitively and accepts older `PARAM_*` capture variables; the first nonempty capture wins over `MESSAGE`. The installed trigger requires a literal space before a roadway argument. The standalone parser accepts broader whitespace.
 
-| Command | Actual scope |
+| Command | Information returned |
 | --- | --- |
-| `!traffic` | High-impact freeway incidents/closures in Metro Phoenix zones EV/CV/WV |
-| `!traffic I-19` or `!traffic 19` | Recognized event types on matching roads across configured zones |
-| `!traffic SR-82` | SR-82 within configured geographic boxes |
-| `!traffic 60` | Route 60; excludes `60TH ST` |
-| `!traffic L202` or `!traffic 202` | Loop 202 |
+| `!traffic` | Metro Phoenix freeway incidents and closures |
+| `!traffic nogales` | Reported events in the approximate Nogales area |
+| `!traffic rio rico` | Reported events in the approximate Rio Rico area |
+| `!traffic santa cruz` | Reported events in the Santa Cruz coverage rectangle |
+| `!traffic <road>` | Recognized incidents, closures, roadwork and hazards matching a road within configured coverage |
 
-`!traffic` does not switch to Nogales just because the scheduled timer is limited to I19/SCZ. Named-road lookups include roadwork and supported hazards. Results sort by broad type (incidents, closures, roadwork, then remaining types) and newest update within a type, then cap at three. There is no additional “more results” message.
+Area aliases are case-insensitive: `riorico`, `rio-rico`, `rio_rico`; `santacruz`, `santa-cruz`, `santa_cruz`, `santa cruz county`, and `scz`.
 
-No-match messages use “No active events for …” for roadway queries or “Metro Phoenix freeways clear of incidents” for the default digest. These statements mean no matching **AZ511 records in configured coverage**, not an independent guarantee that roads are clear. Fetch failures return “ADOT traffic data unavailable.”
+Road queries are open-ended rather than a fixed command list. Examples:
+
+| Road | Accepted examples |
+| --- | --- |
+| Interstate 19 | `!traffic I-19`, `!traffic I19`, `!traffic 19` |
+| Interstate 10 | `!traffic I-10`, `!traffic I10`, `!traffic 10` |
+| Interstate 17 | `!traffic I-17`, `!traffic I17`, `!traffic 17` |
+| Interstate 40 | `!traffic I-40`, `!traffic I40`, `!traffic 40` |
+| US 60 | `!traffic US-60`, `!traffic US60`, `!traffic 60` |
+| State routes | `!traffic SR-82`, `!traffic SR-83`, `!traffic SR-87`, `!traffic SR-189`, `!traffic SR-347` (or the bare route number) |
+| Loop routes | `!traffic L202`, `!traffic L-202`, `!traffic 202`; similarly `L101`/`101` and `L303`/`303` |
+
+Replies contain up to three events: classified incident type, road/direction, zone tag, AZ511 update time and a Google Maps link. Results prioritize incidents, then closures, then roadwork, with newest updates first within each type. No-match replies describe the available AZ511 records, not independently verified road conditions. Travel times, speeds, cameras and weather are not supported.
+
+Area boxes (latitude range, longitude range): Nogales 31.33–31.43, -111.02–-110.88; Rio Rico 31.43–31.65, -111.08–-110.88; Santa Cruz 31.33–31.80, -111.08–-110.43. These are approximate rectangles, not official jurisdiction boundaries. They filter records already inside the configured AZ511 coverage zones.
+
+Use `L202` or `202` for Loop 202. The currently implemented matcher does **not** support `loop202`, despite the old script docstring suggesting it. Commands search configured feed coverage, not every Arizona road.
+
+`!traffic` remains a Metro Phoenix digest; area commands explicitly select the local area. The on-demand responder does not alter scheduled attempt state. Fetch failures return “ADOT traffic data unavailable.”
 
 The on-demand example preserves the installed graph and uses the dedicated `traffic` variable. It replies on the triggering channel through the explicitly selected **Nogales Spicy** source with **hop limit 3** (capped by radio configuration). It currently has no variable-reset step; see the stale-output limitation in the audit. Its later multi-message replies are chained after earlier populated slots; arrays produced by the responder are contiguous.
 

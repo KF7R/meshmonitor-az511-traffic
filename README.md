@@ -44,13 +44,31 @@ Install all five Python files together. The responder imports helpers through `t
 
 ## Quick command reference
 
-```text
-!traffic
-!traffic I-19
-!traffic 19
-!traffic SR-82
-!traffic L202
-```
+| Command | Information returned |
+| --- | --- |
+| `!traffic` | Metro Phoenix freeway incidents and closures |
+| `!traffic nogales` | Reported events in the approximate Nogales area |
+| `!traffic rio rico` | Reported events in the approximate Rio Rico area |
+| `!traffic santa cruz` | Reported events in the Santa Cruz coverage rectangle |
+| `!traffic <road>` | Recognized incidents, closures, roadwork and hazards matching a road within configured coverage |
+
+Area aliases are case-insensitive: `riorico`, `rio-rico`, `rio_rico`; `santacruz`, `santa-cruz`, `santa_cruz`, `santa cruz county`, and `scz`.
+
+Road queries are open-ended rather than a fixed command list. Examples:
+
+| Road | Accepted examples |
+| --- | --- |
+| Interstate 19 | `!traffic I-19`, `!traffic I19`, `!traffic 19` |
+| Interstate 10 | `!traffic I-10`, `!traffic I10`, `!traffic 10` |
+| Interstate 17 | `!traffic I-17`, `!traffic I17`, `!traffic 17` |
+| Interstate 40 | `!traffic I-40`, `!traffic I40`, `!traffic 40` |
+| US 60 | `!traffic US-60`, `!traffic US60`, `!traffic 60` |
+| State routes | `!traffic SR-82`, `!traffic SR-83`, `!traffic SR-87`, `!traffic SR-189`, `!traffic SR-347` (or the bare route number) |
+| Loop routes | `!traffic L202`, `!traffic L-202`, `!traffic 202`; similarly `L101`/`101` and `L303`/`303` |
+
+Replies contain up to three events: classified incident type, road/direction, zone tag, AZ511 update time and a Google Maps link. Results prioritize incidents, then closures, then roadwork, with newest updates first within each type. No-match replies describe the available AZ511 records, not independently verified road conditions. Travel times, speeds, cameras and weather are not supported.
+
+Area boxes (latitude range, longitude range): Nogales 31.33–31.43, -111.02–-110.88; Rio Rico 31.43–31.65, -111.08–-110.88; Santa Cruz 31.33–31.80, -111.08–-110.43. These are approximate rectangles, not official jurisdiction boundaries. They filter records already inside the configured AZ511 coverage zones.
 
 Use `L202` or `202` for Loop 202. The currently implemented matcher does **not** support `loop202`, despite the old script docstring suggesting it. Commands search configured feed coverage, not every Arizona road.
 
