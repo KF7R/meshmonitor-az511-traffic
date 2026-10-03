@@ -10,6 +10,7 @@ The recommended scheduled workflow uses MeshMonitor's native `action.broadcastWa
 
 ## Start here
 
+- [Obtain and install your ADOT API key](docs/GUIDE.md#obtain-and-install-the-adot-api-key)
 - [Detailed installation and operating guide](docs/GUIDE.md)
 - [Feature audit, test evidence, and known limitations](docs/FEATURES.md)
 - [Disabled scheduled automation example](examples/traffic-scheduled.disabled.json)

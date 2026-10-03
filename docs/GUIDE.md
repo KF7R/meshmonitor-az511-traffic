@@ -6,14 +6,15 @@ This guide describes the native scheduled workflow installed on October 2, 2026,
 
 1. [Architecture](#architecture)
 2. [Prerequisites](#prerequisites)
-3. [Install the scripts and ledger](#install-the-scripts-and-ledger)
-4. [Configure the scheduled automation](#configure-the-scheduled-automation)
-5. [Configure on-demand commands](#configure-on-demand-commands)
-6. [Interpret messages and waypoints](#interpret-messages-and-waypoints)
-7. [Configure coverage and lifetimes](#configure-coverage-and-lifetimes)
-8. [Validate without transmitting](#validate-without-transmitting)
-9. [Perform one controlled live test](#perform-one-controlled-live-test)
-10. [Operate, troubleshoot and roll back](#operate-troubleshoot-and-roll-back)
+3. [Obtain and install the ADOT API key](#obtain-and-install-the-adot-api-key)
+4. [Install the scripts and ledger](#install-the-scripts-and-ledger)
+5. [Configure the scheduled automation](#configure-the-scheduled-automation)
+6. [Configure on-demand commands](#configure-on-demand-commands)
+7. [Interpret messages and waypoints](#interpret-messages-and-waypoints)
+8. [Configure coverage and lifetimes](#configure-coverage-and-lifetimes)
+9. [Validate without transmitting](#validate-without-transmitting)
+10. [Perform one controlled live test](#perform-one-controlled-live-test)
+11. [Operate, troubleshoot and roll back](#operate-troubleshoot-and-roll-back)
 
 ## Architecture
 
@@ -68,6 +69,90 @@ docker exec meshmonitor sh -c 'ls -la /data/scripts; ls -la /data/scripts/state'
 ```
 
 Provide `ADOT_API_KEY` using your existing Docker environment configuration. Keep it out of automation JSON, screenshots and Git. Recreating a container may be necessary after changing Docker environment settings. Do not print a full environment dump when requesting help.
+
+## Obtain and install the ADOT API key
+
+### 1. Request your own AZ511 developer key
+
+1. Open the official [AZ511 API documentation](https://www.az511.gov/developers/doc).
+2. Under **Developer API Key**, sign up for an AZ511 account if needed, then log in. Complete any account verification requested by the site.
+3. Return to the documentation page while signed in and request a developer API key. The page says your key information will appear there. Follow the current on-screen instructions; issuance timing is controlled by AZ511.
+4. Copy your issued key into your own private configuration below. The scripts require the environment variable named exactly `ADOT_API_KEY`.
+
+The official documentation currently lists a limit of **10 calls per 60 seconds**. Scheduled polls and on-demand lookups share the same key and request budget. The [Events endpoint](https://az511.com/help/endpoint/event) requires the developer key as a query parameter; the script handles this automatically.
+
+### 2. Add it to the MeshMonitor Docker service
+
+Run these steps on the Pi over SSH, in the directory containing your MeshMonitor Compose file. For this installation that directory is `/home/kf7r/meshmonitor`; substitute your own path on another system.
+
+```bash
+cd /home/kf7r/meshmonitor
+nano .env
+```
+
+Preserve existing entries and add this line, replacing the placeholder with your actual issued key:
+
+```dotenv
+ADOT_API_KEY=PASTE_YOUR_ISSUED_KEY_HERE
+```
+
+Save and exit, then restrict access to the file:
+
+```bash
+chmod 600 .env
+nano docker-compose.yml
+```
+
+Under the existing `meshmonitor` service, add the variable to its existing `environment` block. If it uses mapping syntax:
+
+```yaml
+services:
+  meshmonitor:
+    environment:
+      ADOT_API_KEY: "${ADOT_API_KEY:?Set ADOT_API_KEY in .env}"
+```
+
+If the existing block uses list syntax, add this item instead:
+
+```yaml
+      - ADOT_API_KEY=${ADOT_API_KEY:?Set ADOT_API_KEY in .env}
+```
+
+These are snippets to merge, not replacement Compose files. Preserve all existing service settings and environment entries. Avoid creating a second `environment` block. A Compose `.env` file supplies interpolation values; it does **not** automatically put every value into the container, which is why the explicit service entry is necessary. An existing `env_file` setup can also provide the variable; avoid conflicting duplicate definitions.
+
+Validate without printing the expanded configuration, then recreate only MeshMonitor:
+
+```bash
+docker compose config --quiet
+docker compose up -d --no-deps --force-recreate meshmonitor
+```
+
+This briefly interrupts MeshMonitor connections. A plain `docker restart` does not load changed container environment settings. If your service or Compose filename differs, adapt the commands accordingly.
+
+### 3. Verify without exposing the key or sending radio traffic
+
+Check that the variable reached the container; this prints only whether it is present:
+
+```bash
+docker exec -u node meshmonitor python3 -c 'import os; print("ADOT_API_KEY is set" if os.environ.get("ADOT_API_KEY") else "ADOT_API_KEY is missing")'
+```
+
+After installing the scripts, make one read-only feed check. It neither sends mesh messages nor writes the attempt ledger:
+
+```bash
+docker exec -u node meshmonitor sh -c 'cd /data/scripts && python3 - <<"PY"
+import contextlib
+import io
+import traffic_native_data as traffic
+with contextlib.redirect_stderr(io.StringIO()), contextlib.redirect_stdout(io.StringIO()):
+    events, error = traffic.fetch_traffic_events()
+print("AZ511 fetch failed: check key, connectivity and request limit" if error else "AZ511 fetch OK: %s covered events" % len(events))
+PY'
+```
+
+A zero count can be a successful fetch with no records in configured coverage. If the check fails, confirm the issued key was copied correctly, the container was recreated, internet access works, and the API limit has not been exceeded. Error details may contain a request URL with the key, so redact them before sharing.
+
+Keep `.env`, keys, tokens and production state out of Git. For a Git-managed deployment directory, add `.env` to `.gitignore` before staging files. Do not use `docker compose config` without `--quiet` or print the full container environment when requesting help. The repository examples contain placeholders only.
 
 ## Install the scripts and ledger
 
