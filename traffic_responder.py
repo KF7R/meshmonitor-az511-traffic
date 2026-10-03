@@ -7,8 +7,10 @@
 """
 On-demand traffic report (metro Phoenix digest / per-road lookup).
 
-Two distinct modes, decided by whether MeshMonitor passes a highway
-parameter from the trigger regex:
+Three modes: default metro digest, named-road lookup, or area lookup.
+Area commands: !traffic nogales, !traffic rio rico, !traffic santa cruz.
+Area rectangles are approximate; aliases are listed in README.md.
+Road/default examples:
 
   !traffic                → "freeway accidents/incidents only" digest,
                              METRO ZONES ONLY (East/Central/West Valley —

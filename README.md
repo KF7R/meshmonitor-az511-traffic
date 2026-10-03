@@ -4,7 +4,7 @@ Arizona traffic alerts and road lookups for Meshtastic, using the ADOT AZ511 fee
 
 The recommended scheduled workflow uses MeshMonitor's native `action.broadcastWaypoint`: Python fetches and selects incidents, and MeshMonitor broadcasts their map pins and Traffic-channel text. The separate `!traffic` responder provides on-demand reports.
 
-**Verified deployment:** MeshMonitor **4.17.0-rc1**, Docker on Raspberry Pi, October 2, 2026. The five-minute I-19/Santa Cruz timer is installed and enabled. A separate controlled test delivered both its TEST message and waypoint to a receiving app. Automatic delivery confirmation is unavailable in this release; the timer records bounded attempts.
+**Current deployment:** MeshMonitor **4.17.0-rc2** (original native feature audit against rc1), Docker on Raspberry Pi, October 2, 2026. The five-minute I-19/Santa Cruz timer is installed and enabled. A separate controlled test delivered both its TEST message and waypoint to a receiving app. Automatic delivery confirmation is unavailable in this release; the timer records bounded attempts.
 
 ![Scheduled Traffic automation enabled](docs/images/timer-enabled.jpg)
 
@@ -25,6 +25,9 @@ The recommended scheduled workflow uses MeshMonitor's native `action.broadcastWa
 | Bounded retry | Offer an incident immediately and once more after at least 30 minutes; stop after two attempts for its current fingerprint |
 | `!traffic` | Up to three Metro Phoenix freeway incidents/closures; this is **not** a Nogales digest |
 | `!traffic I-19` | Up to three matching-road events across configured zones, including roadwork |
+| Area lookups | `!traffic nogales`, `!traffic rio rico`, `!traffic santa cruz`; approximate area rectangles |
+| Duplicate prevention | Only the selected receiving source triggers on-demand replies; all replies use that source |
+| Scheduled hop limit | Waypoints and text inherit the selected radio configuration |
 | Incident display | Classified emoji, normalized road, direction, zone tag, update time and Google Maps link |
 
 Coverage uses rectangles, not a county boundary polygon. Overlapping zones can exclude northern I-19 from scheduled selection. See the [coverage audit](docs/FEATURES.md#known-limitations).

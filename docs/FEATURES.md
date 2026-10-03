@@ -2,6 +2,10 @@
 
 Checked October 2, 2026 against repository commit `176a121f09f3eb1cd8c6853be38ed0cfd439740c`, the additive native timer files included here, and installed MeshMonitor v4.17.0-rc1. This is an audit of Traffic features; unrelated weather helpers in `common.py` are not Traffic features and were not exercised.
 
+## October 3 update
+
+The current deployment runs MeshMonitor 4.17.0-rc2; the original detailed audit below used rc1. Area lookup tests and retired-entry-point tests bring the offline suite to 20 tests. Nogales, Rio Rico and Santa Cruz aliases are supported using approximate rectangles. Scheduled waypoint hop overrides were removed to inherit radio settings. The on-demand workflow now filters receiving sources before executing the script. Both receiving radios had triggered the same command previously; after the Spicy-only filter, the operator confirmed exactly three replies. The portable examples reflect these saved settings and remain disabled. Shared-variable concurrency and northern I-19 overlap remain unresolved.
+
 ## Feature inventory
 
 | Feature | Actual behavior | Evidence |
@@ -75,7 +79,7 @@ These are recorded findings, not resolved defects. The live settings were change
 
 ### Automated feature audit
 
-`python3 -m unittest discover -s tests -v` passes **15 tests** with subtests over every classifier keyword group. It covers:
+`python3 -m unittest discover -s tests -v` passes **20 tests** with subtests over every classifier keyword group. It covers:
 
 - zone inventory, southern coverage and the northern overlap;
 - broad event type, future start, age and geographic filtering;
@@ -99,7 +103,7 @@ These checks never request the live feed or use production state. The retired ti
 - A separate disabled manual-test rule dry-ran one waypoint plus one text to channel 3.
 - Its single live run completed the native waypoint, pause and message actions.
 - Operator reported receiving **both** TEST message and waypoint in the receiving app.
-- The saved on-demand rule was reopened and all four send actions verified as Nogales Spicy source + hop limit 3. Its reception after this source change has not been independently tested here.
+- The saved on-demand rule was reopened and all four send actions verified as Nogales Spicy source + hop limit 3. The later Spicy-only receive filter was confirmed by the operator with three replies; see the October 3 update.
 
 ### Still requires operational observation
 

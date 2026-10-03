@@ -9,5 +9,5 @@
 <rect x="40" y="280" width="1020" height="65" rx="12" fill="#302c22" stroke="#c6a653"/>
 <g font-family="Arial, sans-serif" fill="#f4e5b2" font-size="17"><text x="62" y="307" font-weight="bold">An attempt is not a delivery receipt.</text><text x="62" y="331" font-size="15">A successful text may repeat once. Failed or skipped pins do not automatically stop their text actions.</text></g>
 <rect x="40" y="380" width="1020" height="90" rx="12" fill="#183b38" stroke="#3d8179"/>
-<g font-family="Arial, sans-serif" fill="#ddfff8"><text x="62" y="409" font-size="20" font-weight="bold">On demand: !traffic or !traffic I-19</text><text x="62" y="438" font-size="17">Separate responder → up to 3 text replies → Nogales Spicy → hop limit 3</text><text x="62" y="459" font-size="14">Bare !traffic reports Metro Phoenix. Named-road commands search the configured coverage boxes.</text></g>
+<g font-family="Arial, sans-serif" fill="#ddfff8"><text x="62" y="409" font-size="20" font-weight="bold">On demand: !traffic, road or area</text><text x="62" y="438" font-size="17">Spicy reception only → separate responder → up to 3 replies via Spicy (3 hops)</text><text x="62" y="459" font-size="14">Bare !traffic: Metro Phoenix. Areas: Nogales / Rio Rico / Santa Cruz. Scheduled packets inherit radio hops.</text></g>
 </svg>

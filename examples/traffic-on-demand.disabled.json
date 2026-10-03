@@ -1,6 +1,6 @@
 {
   "name": "Traffic (On-Demand)",
-  "description": "Text replies via Nogales Spicy, hop limit 3. Replace source UUID before use.",
+  "description": "Only commands heard by the selected source trigger replies through that same source; hop limit 3. Replace every source UUID placeholder before use.",
   "enabled": false,
   "config": {
     "version": 1,
@@ -10,6 +10,15 @@
         "type": "trigger.message",
         "params": {
           "regex": "(?i)^!traffic( .+)?$"
+        }
+      },
+      {
+        "id": "spicy_only",
+        "type": "condition.sourceFilter",
+        "params": {
+          "sourceIds": [
+            "REPLACE_WITH_SOURCE_UUID"
+          ]
         }
       },
       {
@@ -114,7 +123,12 @@
     "edges": [
       {
         "from": "trigger",
-        "to": "run"
+        "to": "spicy_only"
+      },
+      {
+        "from": "spicy_only",
+        "to": "run",
+        "port": "true"
       },
       {
         "from": "run",

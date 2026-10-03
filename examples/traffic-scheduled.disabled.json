@@ -1,5 +1,5 @@
 {
-  "name": "Traffic Alerts — I-19 / Santa Cruz",
+  "name": "Traffic Alerts \u2014 I-19 / Santa Cruz",
   "description": "Five-minute AZ511 poll, native pins and channel 3 text, bounded attempts. Replace source UUID before use.",
   "enabled": false,
   "config": {
@@ -52,7 +52,6 @@
           "icon": "{{ var.traffic_scheduled.incident0.icon }}",
           "expireHours": "{{ var.traffic_scheduled.incident0.expire_hours }}",
           "channel": 3,
-          "hopLimit": "3",
           "onlyWhenChanged": true
         }
       },
@@ -96,7 +95,6 @@
           "icon": "{{ var.traffic_scheduled.incident1.icon }}",
           "expireHours": "{{ var.traffic_scheduled.incident1.expire_hours }}",
           "channel": 3,
-          "hopLimit": "3",
           "onlyWhenChanged": true
         }
       },
@@ -140,7 +138,6 @@
           "icon": "{{ var.traffic_scheduled.incident2.icon }}",
           "expireHours": "{{ var.traffic_scheduled.incident2.expire_hours }}",
           "channel": 3,
-          "hopLimit": "3",
           "onlyWhenChanged": true
         }
       },

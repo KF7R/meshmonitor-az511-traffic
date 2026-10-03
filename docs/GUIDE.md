@@ -44,6 +44,8 @@ This is not “newly created in AZ511” detection: an empty ledger offers curre
 
 Attempts are saved **before** MeshMonitor receives the script output. A crash, script timeout after saving, disconnected radio, skipped waypoint or failed message can consume an attempt. A successful first text can repeat on the second attempt. No action result is written back to the ledger. After two failures, manual investigation is needed.
 
+The live deployment was subsequently updated to **4.17.0-rc2**. On October 3, the operator confirmed one set of three replies after restricting on-demand reception to Spicy. Scheduled waypoints now inherit the radio hop limit; on-demand replies retain their explicit limit of 3. The original release-source audit below remains against rc1.
+
 ## Prerequisites
 
 - MeshMonitor with Automation Engine and native `action.broadcastWaypoint` support; verified here on 4.17.0-rc1.
@@ -233,7 +235,7 @@ The file is an envelope containing `name`, `description`, `enabled`, and `config
 | Script timeout | 30 seconds |
 | Waypoint channel | 3 |
 | Message channel | 3 |
-| Waypoint hop limit | 3, capped by radio configuration |
+| Waypoint hop limit | Inherits radio configuration (hopLimit omitted) |
 | Text hop limit | Inherits radio configuration |
 | `onlyWhenChanged` | true |
 | Pause after each waypoint | 5 seconds |
@@ -289,6 +291,8 @@ Area boxes (latitude range, longitude range): Nogales 31.33–31.43, -111.02–-
 Use `L202` or `202` for Loop 202. The currently implemented matcher does **not** support `loop202`, despite the old script docstring suggesting it. Commands search configured feed coverage, not every Arizona road.
 
 `!traffic` remains a Metro Phoenix digest; area commands explicitly select the local area. The on-demand responder does not alter scheduled attempt state. Fetch failures return “ADOT traffic data unavailable.”
+
+Replace every source UUID placeholder, including the `condition.sourceFilter` node, with the same radio UUID. The filter accepts commands heard by that radio only; copies heard by other connected sources stop before running the script. This prevents one mesh packet from causing multiple sets of replies. Selecting only a sending source does not restrict which receivers can trigger the workflow.
 
 The on-demand example preserves the installed graph and uses the dedicated `traffic` variable. It replies on the triggering channel through the explicitly selected **Nogales Spicy** source with **hop limit 3** (capped by radio configuration). It currently has no variable-reset step; see the stale-output limitation in the audit. Its later multi-message replies are chained after earlier populated slots; arrays produced by the responder are contiguous.
 
