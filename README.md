@@ -35,12 +35,12 @@ Coverage uses rectangles, not a county boundary polygon. Overlapping zones can e
 | `traffic_attempts.py` | Recommended native timer entry point; persists a separate attempt ledger |
 | `traffic_native_data.py` | AZ511 filtering, classification, formatting, waypoint data and pure selection; no RF transport |
 | `traffic_responder.py` | Existing text-only on-demand responder |
-| `traffic_timer.py` | Retained **legacy** Virtual Node sender and helper dependency of the responder; do not enable alongside the native timer |
+| `traffic_timer.py` | Deprecated compatibility module: re-exports native helpers for the responder; direct execution is silent and never transmits |
 | `common.py` | Shared HTTP, text, state and output helpers |
 | `examples/` | Disabled, portable automation examples; replace source placeholders before use |
 | `tests/` | Synthetic feature audit; no live AZ511, RF or production state |
 
-Install all five Python files together. The responder still imports helpers from `traffic_timer.py`; retaining that file does not transmit unless its legacy entry point is executed. This migration adds native files without changing the existing on-demand behavior.
+Install all five Python files together. The responder imports helpers through `traffic_timer.py`, which now re-exports them from `traffic_native_data.py`. The old Virtual Node transmitter has been removed. Executing the deprecated entry point prints an empty response and a deprecation warning; scheduled traffic uses the Automation Engine.
 
 ## Quick command reference
 

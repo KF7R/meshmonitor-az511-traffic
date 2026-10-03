@@ -29,7 +29,7 @@ Checked October 2, 2026 against repository commit `176a121f09f3eb1cd8c6853be38ed
 | Stable native key | SHA1 of full external ID, independent of slot; namespace includes source and automation | Synthetic key checks and native service inspection |
 | Pin expiry | Incidents two-hour cap/fallback; closures planned end up to seven days, 12-hour fallback | Synthetic tests |
 | Skip/failure routing | Waypoint errors/skips do not prevent following text automatically in rc1 | Release evaluator inspection and prior isolated native harness |
-| Legacy compatibility | Original sender retained for responder imports; native timer uses separate files | Imports and code inspection |
+| Legacy compatibility | Deprecated entry point re-exports native helpers for responder imports; original transmitter removed | Imports and code inspection |
 
 ## Coverage table
 
@@ -89,7 +89,7 @@ These are recorded findings, not resolved defects. The live settings were change
 - MESSAGE/PARAM parsing, empty/error replies, metro scope and ranked results;
 - actual CLI persistence, lock contention and malformed scratch ledgers.
 
-These checks never execute the legacy transmitter, request the live feed or use production state. They test expected behavior and expose implementation limitations; passing does not certify all external data or hardware conditions.
+These checks never request the live feed or use production state. The retired timer entry point is checked only for silent output and compatibility imports. They test expected behavior and expose implementation limitations; passing does not certify all external data or hardware conditions.
 
 ### Installed deployment
 

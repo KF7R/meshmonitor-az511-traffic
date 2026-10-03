@@ -25,7 +25,7 @@ MeshMonitor captures the output in a dedicated global JSON variable, `traffic_sc
 
 The example has three branches. **The five-second pauses do not guarantee five seconds between every transmitted packet:** multiple waypoint branches may run before their text actions. This is a per-waypoint pause, not a serialized RF queue.
 
-Python never opens a radio connection in this native path. The old Virtual Node transport, protobuf building and manual TCP connection belong only to the retained legacy `traffic_timer.py` entry point.
+Python never opens a radio connection in this native path. The old Virtual Node transport, protobuf building and manual TCP connection have been removed from `traffic_timer.py`. That deprecated entry point is now silent and retains only compatibility imports.
 
 ### What “new” means
 
@@ -52,7 +52,7 @@ Attempts are saved **before** MeshMonitor receives the script output. A crash, s
 - A writable persistent script/state directory for the container's `node` user.
 - Administration access to create variables and automations.
 
-No extra Python package is required by the native files. The legacy transmitter needs Meshtastic packages only if you execute that old path.
+No extra Python package is required by the native files. The deprecated timer also needs no Meshtastic transport packages; it cannot transmit.
 
 The working deployment has a host bind mount similar to:
 
@@ -89,7 +89,7 @@ traffic_native_data.py
 traffic_attempts.py
 ```
 
-For an existing installation, keep its matching `common.py`, `traffic_timer.py`, and `traffic_responder.py`, and add the two native files. Review local changes before overwriting older files.
+For an existing installation, back up and review local changes, then install the matching five files together. Replace the old `traffic_timer.py` with the deprecated compatibility module so accidentally executing an old timer cannot transmit.
 
 If copying from Windows with `scp`, execute the following **in Windows PowerShell**, not inside the Pi SSH session:
 
@@ -233,7 +233,7 @@ Scheduled selection accepts only events already labeled I19 or SCZ by `match_zon
 
 I19 uses a roadway-restricted rectangle: latitude 31.33–32.22, longitude -111.12–-110.90, roadway matching I-19. SCZ uses latitude 31.33–31.80 and longitude -111.08–-110.43 without a roadway restriction. These approximate coverage, not official jurisdiction boundaries. Earlier zones win overlaps; see [the coverage caveat](FEATURES.md#known-limitations).
 
-The full zone table is in [the feature audit](FEATURES.md#coverage-table). It remains available for on-demand lookups. To alter coverage, review both helper modules: the native timer uses `traffic_native_data.py`; the responder uses the retained `traffic_timer.py` helpers.
+The full zone table is in [the feature audit](FEATURES.md#coverage-table). It remains available for on-demand lookups. To alter coverage, review `traffic_native_data.py`: both the native timer and the responder use its helpers, with the responder importing through the `traffic_timer.py` compatibility module.
 
 | Setting | Default | Applies to |
 | --- | --- | --- |
@@ -346,7 +346,7 @@ Before sharing logs, redact keys/tokens and private data. urllib error messages 
 1. Disable the native scheduled rule in the global Automation Engine.
 2. Keep its scripts and ledger for investigation; do not erase the attempt history.
 3. Verify no native run is still active before switching producers.
-4. Restore a backed-up legacy timer configuration only if intentionally returning to Virtual Node transmission.
+4. Returning to Virtual Node transmission requires intentionally restoring both an older transmitter from Git history/backup and its timer configuration. The current `traffic_timer.py` cannot transmit.
 5. Enable only one scheduled Traffic producer. On-demand commands can remain enabled.
 
 Merging this guide and example files does not itself change a live server. Local fixes to coverage or matching also require a deliberate installation step.
