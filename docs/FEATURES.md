@@ -75,11 +75,15 @@ Coverage gaps outside these rectangles are intentional in the original helpers; 
 
 These are recorded findings, not resolved defects. The live settings were changed only for the requested on-demand source/hop limit during this review.
 
+## Installer verification
+
+The interactive installer adds five offline tests: configured examples, private-file permissions/symlink rejection, preserving existing API objects, disabled-only creation with remote HTTPS checks, and a full prepare-only CLI run in a temporary directory. Together the suite now has 25 tests. Docker recreation and live authenticated API creation were not exercised; see [installer limitations](INSTALLER.md).
+
 ## Verification completed
 
 ### Automated feature audit
 
-`python3 -m unittest discover -s tests -v` passes **20 tests** with subtests over every classifier keyword group. It covers:
+`python3 -m unittest discover -s tests -v` passes **25 tests** with subtests over every classifier keyword group. It covers:
 
 - zone inventory, southern coverage and the northern overlap;
 - broad event type, future start, age and geographic filtering;

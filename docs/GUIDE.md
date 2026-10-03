@@ -2,6 +2,8 @@
 
 This guide describes the native scheduled workflow installed on October 2, 2026, plus the existing on-demand responder. Schema and behavior were checked against MeshMonitor **v4.17.0-rc1**. Later releases may offer different fields or delivery-result handling; use an export from your installed version when adapting the examples.
 
+For interactive setup, see [the installer guide](INSTALLER.md). Manual installation steps follow below.
+
 ## Contents
 
 1. [Architecture](#architecture)

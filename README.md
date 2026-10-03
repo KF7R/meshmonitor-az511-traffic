@@ -8,6 +8,16 @@ The recommended scheduled workflow uses MeshMonitor's native `action.broadcastWa
 
 ![Scheduled Traffic automation enabled](docs/images/timer-enabled.jpg)
 
+## Interactive installation
+
+On your Linux Docker host, from a complete repository checkout:
+
+```bash
+python3 install_traffic.py
+```
+
+Prompts for source UUID, channel, hops and a hidden ADOT API key; backs up scripts, preserves ledgers, and optionally creates disabled workflows with a user-supplied MeshMonitor API token. Requires an existing MeshMonitor Docker installation and `/data/scripts` bind mount. See [installer requirements, usage and rollback](docs/INSTALLER.md). Use `--prepare-only` to generate imports without Docker/API changes.
+
 ## Start here
 
 - [Obtain and install your ADOT API key](docs/GUIDE.md#obtain-and-install-the-adot-api-key)
