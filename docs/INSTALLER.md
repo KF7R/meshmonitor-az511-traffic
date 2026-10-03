@@ -32,4 +32,6 @@ The key is stored in the private `compose.traffic.json` file, with mode 600 insi
 
 It does not automatically restore files after failure. To roll back, disable Traffic workflows in the UI, restore backed-up scripts, and recreate MeshMonitor using your previous Compose configuration. Preserve the current ledger for investigation; restoring an old ledger can reannounce incidents. The installer does not delete API-created variables or workflows.
 
-This version was checked with offline tests and the installed MeshMonitor 4.17.0-rc2 API schemas. The Docker recreation and authenticated API creation paths have not been run against production by this development task. Concurrent on-demand requests still share variables; the known northern I-19 coverage overlap remains unchanged.
+This version was checked with 25 offline tests and the installed MeshMonitor 4.17.0-rc2 API schemas. On October 3, 2026, an actual installation and rollback passed in a disposable Docker project using the rc2 image, networking disabled and a dummy key. The test verified container recreation, installed imports, private configuration, script/ledger backups, preserved attempt history, and rollback removal of the key override. The disposable container was removed afterward; the live MeshMonitor remained healthy.
+
+Authenticated API creation is still tested with mocks, not a live token. No production installation or real API key was used in the isolated test. Concurrent on-demand requests still share variables; the known northern I-19 coverage overlap remains unchanged.
