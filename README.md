@@ -4,7 +4,7 @@ Arizona traffic alerts and road lookups for Meshtastic, using the ADOT AZ511 fee
 
 The recommended scheduled workflow uses MeshMonitor's native `action.broadcastWaypoint`: Python fetches and selects incidents, and MeshMonitor broadcasts their map pins and Traffic-channel text. The separate `!traffic` responder provides on-demand reports.
 
-**Current deployment:** MeshMonitor **4.17.0-rc2** (original native feature audit against rc1), Docker on Raspberry Pi, October 2, 2026. The five-minute I-19/Santa Cruz timer is installed and enabled. A separate controlled test delivered both its TEST message and waypoint to a receiving app. Automatic delivery confirmation is unavailable in this release; the timer records bounded attempts.
+**Current deployment:** MeshMonitor **4.17.0-rc2** (original native feature audit against rc1), Docker on Raspberry Pi, October 2, 2026. The five-minute I-19/Santa Cruz timer is installed and enabled. A separate controlled test delivered both its TEST message and waypoint to a receiving app. Automatic delivery confirmation is unavailable in this release; the timer records offers without automatic retries.
 
 ![Scheduled Traffic automation enabled](docs/images/timer-enabled.jpg)
 
@@ -32,7 +32,7 @@ Prompts for source UUID, channel, hops and a hidden ADOT API key; backs up scrip
 | Workflow | Behavior |
 | --- | --- |
 | Scheduled alerts | Poll every five minutes; select new or changed high-impact events labeled I19/SCZ; up to three per cycle; native waypoint and Traffic text |
-| Bounded retry | Offer an incident immediately and once more after at least 30 minutes; stop after two attempts for its current fingerprint |
+| Duplicate suppression | One offer per visible incident version; no timed repeat; timestamp/dispatch-text churn is ignored |
 | `!traffic` | Up to three Metro Phoenix freeway incidents/closures; this is **not** a Nogales digest |
 | `!traffic I-19` | Up to three matching-road events across configured zones, including roadwork |
 | Area lookups | `!traffic nogales`, `!traffic rio rico`, `!traffic santa cruz`; approximate area rectangles |

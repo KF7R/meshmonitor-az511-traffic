@@ -1,31 +1,53 @@
-"""Bounded attempt scheduler. Attempts are NOT delivery receipts."""
+"""Once-per-visible-update scheduler. Attempts are NOT delivery receipts."""
 import argparse
+import copy
+import hashlib
 import json
 import os
 import time
 from pathlib import Path
 import traffic_native_data as producer
 
-RETRY_SECONDS = 1800
-MAX_ATTEMPTS = 2
+MAX_ATTEMPTS = 1
+
+def alert_fingerprint(ev):
+    # Ignore timestamp and raw dispatch prose. Match the useful visible facts.
+    facts = [producer.event_headline(ev), round(float(ev.get('Latitude', 0)), 4),
+             round(float(ev.get('Longitude', 0)), 4)]
+    return hashlib.sha256(json.dumps(facts, ensure_ascii=True).encode()).hexdigest()
 
 def plan(events, ledger, now):
     suppressed = {}
-    for eid, entry in ledger.items():
-        if entry['attempts'] >= MAX_ATTEMPTS or now - entry['last_attempt'] < RETRY_SECONDS:
-            suppressed[eid] = {'fp': entry['fp'], 'first_seen': entry['first_attempt'], 'last_seen': now}
+    updated = copy.deepcopy(ledger)
+    visible = {}
+    for ev in events:
+        eid = str(ev.get('ID') or ev.get('Id') or '0')
+        afp = alert_fingerprint(ev)
+        visible[eid] = afp
+        entry = updated.get(eid)
+        if entry is None:
+            continue
+        # Quietly adopt existing IDs on the first post-upgrade observation.
+        # Resetting history would reannounce every currently active incident.
+        if 'alert_fps' not in entry:
+            entry['alert_fps'] = [afp]
+        if afp in entry['alert_fps']:
+            suppressed[eid] = {'fp': producer.fingerprint(ev),
+                'first_seen': entry['first_attempt'], 'last_seen': now}
     payload = producer.prepare_cycle(events, suppressed, now)
-    updated = dict(ledger)
     for incident in payload['incidents']:
         eid, fp = incident['event_id'], incident['fingerprint']
         previous = ledger.get(eid, {})
         same = previous.get('fp') == fp
+        history = list(updated.get(eid, {}).get('alert_fps', []))
+        if visible[eid] not in history:
+            history.append(visible[eid])
         updated[eid] = {'fp': fp, 'attempts': previous['attempts'] + 1 if same else 1,
                         'first_attempt': previous['first_attempt'] if same else now,
-                        'last_attempt': now}
+                        'last_attempt': now, 'alert_fps': history}
     payload.pop('maintenance_state', None)
-    payload['delivery_policy'] = 'bounded_attempts_without_receipts'
-    payload['exhausted_count'] = sum(e['attempts'] >= MAX_ATTEMPTS for e in updated.values())
+    payload['delivery_policy'] = 'once_per_visible_update_without_receipts'
+    payload['exhausted_count'] = len(updated)
     return payload, updated
 
 def main():
@@ -51,6 +73,9 @@ def main():
             raise ValueError('Expected a version 1 attempt ledger')
         ledger = document['attempts']
         for eid, entry in ledger.items():
+            if 'alert_fps' in entry and (not isinstance(entry['alert_fps'], list)
+                    or any(not isinstance(fp, str) for fp in entry['alert_fps'])):
+                raise ValueError('Invalid visible-update history')
             if not isinstance(entry, dict) or not isinstance(entry.get('fp'), str):
                 raise ValueError('Invalid attempt entry')
             if type(entry.get('attempts')) is not int or entry['attempts'] < 1:

@@ -32,21 +32,22 @@ Python never opens a radio connection in this native path. The old Virtual Node 
 
 ### What “new” means
 
-An event is new when its AZ511 event ID has no matching current fingerprint in the attempt ledger. The fingerprint contains its ID and sanitized description. A substantive description change gets a fresh two-attempt budget. Dispatch status changes removed by the sanitizer do not count as new.
+The scheduled workflow now sends **once per visible incident update**, with no automatic 30-minute repeat. It fingerprints the classified headline (including road, direction and full-closure status) and coordinates rounded to four decimal places. A timestamp change or raw dispatch-description change alone does not trigger another alert.
 
-This is not “newly created in AZ511” detection: an empty ledger offers currently eligible incidents, provided they pass the start-age filter. Unchanged coordinates, type, or `LastUpdated` changes alone do not change the fingerprint. The ledger retains only the latest fingerprint per ID; reverting to an older description can start another budget.
+Each event ID retains the history of visible fingerprints already offered, so reverting to an earlier visible version is also suppressed. A changed headline or location is eligible for a new alert. Separate AZ511 IDs remain separate incidents; identical-looking records with different IDs are not merged.
+
+When an old ledger entry has no visible-update history, its first observed version is adopted without sending. This avoids reannouncing existing incidents during upgrade, but an update already present at the migration observation will also be adopted quietly. Subsequent meaningful changes are eligible.
 
 ### Attempt policy
 
-- First eligible poll: record attempt 1 and offer the incident.
-- Polls before 30 minutes: suppress the same fingerprint.
-- First eligible poll at/after 30 minutes: record attempt 2 and offer it again.
-- Later polls: suppress that fingerprint.
-- Overflow incidents remain unrecorded until selected, so subsequent cycles can offer them.
+- First eligible visible version: record it and offer one waypoint/text pair.
+- Later polls: suppress that visible version, even after 30 minutes.
+- Changed visible version: offer once, unless that version was previously offered.
+- Overflow incidents remain unrecorded until selected.
 
-Attempts are saved **before** MeshMonitor receives the script output. A crash, script timeout after saving, disconnected radio, skipped waypoint or failed message can consume an attempt. A successful first text can repeat on the second attempt. No action result is written back to the ledger. After two failures, manual investigation is needed.
+The attempt is saved before MeshMonitor receives the script output. A crash, timeout, disconnected radio, skipped waypoint or failed message can consume it. There is no delivery receipt or automatic retry; use on-demand queries or investigate manually if delivery fails. The persistent ledger must not be cleared during upgrades.
 
-The live deployment was subsequently updated to **4.17.0-rc2**. On October 3, the operator confirmed one set of three replies after restricting on-demand reception to Spicy. Scheduled waypoints now inherit the radio hop limit; on-demand replies retain their explicit limit of 3. The original release-source audit below remains against rc1.
+The live deployment runs **4.17.0-rc2**. The operator confirmed one set of three on-demand replies after the Spicy-only receiving-source filter. Scheduled waypoints inherit radio hop settings; on-demand replies retain their explicit limit of 3. The original release-source audit below remains against rc1.
 
 ## Prerequisites
 
@@ -357,7 +358,7 @@ The full zone table is in [the feature audit](FEATURES.md#coverage-table). It re
 | `WAYPOINT_CHANNEL` | Unset | Legacy/data field; native RF channel comes from JSON |
 | `TZ` / container timezone | Deployment-dependent | Timestamp display; configure container timezone consistently |
 
-Native retry constants are `RETRY_SECONDS = 1800` and `MAX_ATTEMPTS = 2` in `traffic_attempts.py`, not environment settings. Do not shorten the retry interval below the native per-waypoint resend floor expecting more sends.
+Scheduled visible versions are offered once; there is no retry interval. MeshMonitor may still throttle a changed waypoint, independently of the script.
 
 Expiry rules:
 
@@ -438,8 +439,8 @@ Use the intended radio's Traffic channel and a receiving app to verify output. R
 | Feed count large but no alerts | Feed count spans all zones; scheduled type/age/tag filters and ledger budgets still apply |
 | I-19 event missing | Inspect coordinates, roadway and first-matching zone; northern I-19 can be labeled TUS |
 | Pin skipped but text present | Native skip/failure does not gate the following text action in rc1 |
-| Same text twice | Expected second attempt after 30 minutes; also check for an old timer still enabled |
-| No output after two failures | Budget exhausted; investigate transport and deliberately requeue affected entries after backup |
+| Same text twice | Check for another enabled timer, distinct feed IDs, or old scheduler code; current policy has no timed resend |
+| No output after a failed send | No automatic retry; inspect transport and use an on-demand query |
 | Stale incident data sent | Reset and script can both fail; inspect run errors; prevent overlapping runs |
 | Wrong channel | Verify source-specific channel index and every JSON message/waypoint action |
 | Only text or only pin in an app | Check receiver channel/key, RF reach, expiry and action errors; action completion is not receipt confirmation |

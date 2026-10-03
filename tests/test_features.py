@@ -98,16 +98,31 @@ class TrafficFeatures(unittest.TestCase):
         self.assertEqual(data.build_waypoint_dict(event(EventType="closures", PlannedEndDate=NOW + 9999999), NOW)["expire"], NOW + 604800)
         self.assertEqual(data.build_waypoint_dict(event(PlannedEndDate=NOW + 600), NOW)["expire"], NOW + 600)
 
-    def test_retry_boundary_exhaustion_and_version_change(self):
+    def test_once_per_visible_update(self):
         payload, ledger = attempts.plan([event()], {}, NOW)
         before = copy.deepcopy(ledger)
-        self.assertEqual(attempts.plan([event()], ledger, NOW + 1799)[0]["count"], 0)
-        self.assertEqual(attempts.plan([event()], ledger, NOW + 1800)[0]["count"], 1)
-        _, twice = attempts.plan([event()], ledger, NOW + 1800)
-        self.assertEqual(attempts.plan([event()], twice, NOW + 3600)[0]["count"], 0)
-        self.assertEqual(attempts.plan([event(Description="Updated")], twice, NOW + 3600)[0]["count"], 1)
+        for seconds in (300, 1799, 1800, 3600, 25000):
+            self.assertEqual(attempts.plan([event()], ledger, NOW + seconds)[0]["count"], 0)
+        noise = event(Description="Crash: dispatch updated", LastUpdated=NOW + 600)
+        self.assertEqual(attempts.plan([noise], ledger, NOW + 600)[0]["count"], 0)
+        closure = event(IsFullClosure=True)
+        changed, updated = attempts.plan([closure], ledger, NOW + 600)
+        self.assertEqual(changed["count"], 1)
+        self.assertEqual(attempts.plan([closure], updated, NOW + 2400)[0]["count"], 0)
+        self.assertEqual(attempts.plan([event()], updated, NOW + 2500)[0]["count"], 0)
+        self.assertEqual(attempts.plan([event(Latitude=31.51)], ledger, NOW + 600)[0]["count"], 1)
         self.assertEqual(ledger, before)
-        self.assertEqual(payload["delivery_policy"], "bounded_attempts_without_receipts")
+        self.assertEqual(payload["delivery_policy"], "once_per_visible_update_without_receipts")
+
+    def test_quiet_legacy_ledger_migration(self):
+        ev = event()
+        old = {"audit-1": {"fp": data.fingerprint(ev), "attempts": 2,
+            "first_attempt": NOW-3600, "last_attempt": NOW-1800}}
+        payload, migrated = attempts.plan([ev], old, NOW)
+        self.assertEqual(payload["count"], 0)
+        self.assertEqual(len(migrated["audit-1"]["alert_fps"]), 1)
+        self.assertNotIn("alert_fps",old["audit-1"])
+        self.assertEqual(attempts.plan([event(IsFullClosure=True)],migrated,NOW+300)[0]["count"],1)
 
     def test_cap_duplicate_ids_and_overflow(self):
         events = [event(str(i)) for i in range(4)]

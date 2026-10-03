@@ -6,6 +6,10 @@ Checked October 2, 2026 against repository commit `176a121f09f3eb1cd8c6853be38ed
 
 The current deployment runs MeshMonitor 4.17.0-rc2; the original detailed audit below used rc1. Area lookup tests and retired-entry-point tests bring the offline suite to 20 tests. Nogales, Rio Rico and Santa Cruz aliases are supported using approximate rectangles. Scheduled waypoint hop overrides were removed to inherit radio settings. The on-demand workflow now filters receiving sources before executing the script. Both receiving radios had triggered the same command previously; after the Spicy-only filter, the operator confirmed exactly three replies. The portable examples reflect these saved settings and remain disabled. Shared-variable concurrency and northern I-19 overlap remain unresolved.
 
+## Scheduled duplicate correction (October 3)
+
+The earlier two-attempt policy deliberately repeated a successful alert after 30 minutes. Description-only changes could also reset its budget while the displayed alert remained identical. This is superseded by one offer per visible headline/coordinate fingerprint, with per-ID history and quiet adoption of legacy entries. New tests cover long-term suppression, timestamp/prose churn, meaningful updates, reversion and migration. The current suite passes 26 tests. The older retry/fingerprint findings below describe the original implementation and are historical; see the current guide for the active policy. Different event IDs and transport-level duplicates remain possible. No receiver acknowledgment or automatic retry is added.
+
 ## Feature inventory
 
 | Feature | Actual behavior | Evidence |
@@ -18,8 +22,8 @@ The current deployment runs MeshMonitor 4.17.0-rc2; the original detailed audit 
 | Native transport | `action.broadcastWaypoint` plus `action.sendMessage`; producer has no radio sender | Code, dry run and one controlled receiving-app confirmation |
 | Scheduled output limit | Up to three incidents; duplicate IDs cannot occupy more than one slot; overflow deferred | Synthetic tests |
 | Scheduled order | Feed order; no severity sort in native timer | Code inspection |
-| Bounded retries | Two attempts for latest fingerprint, at least 30 minutes apart | Exact-boundary/exhaustion tests |
-| Change detection | ID plus sanitized description; dispatch-status churn removed | Synthetic tests |
+| Scheduled offers | Once per visible version, with no timed retry | Regression tests |
+| Change detection | Per-ID visible headline and rounded coordinates; history suppresses reversion | Synthetic tests |
 | Ledger durability | Atomic replace; exclusive file lock; persisted before output; separate from legacy state | Scratch CLI tests and code inspection |
 | On-demand parsing | MESSAGE or older PARAM_*; case-insensitive parser | Synthetic tests |
 | Default digest | Metro Phoenix high-impact freeway records, not I-19/Santa Cruz | Synthetic tests |
@@ -83,7 +87,7 @@ The interactive installer adds five offline tests: configured examples, private-
 
 ### Automated feature audit
 
-`python3 -m unittest discover -s tests -v` passes **25 tests** with subtests over every classifier keyword group. It covers:
+`python3 -m unittest discover -s tests -v` passes **26 tests** with subtests over every classifier keyword group. It covers:
 
 - zone inventory, southern coverage and the northern overlap;
 - broad event type, future start, age and geographic filtering;
